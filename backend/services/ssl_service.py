@@ -1,6 +1,7 @@
 import ssl
 import socket
 from datetime import datetime, timezone
+from typing import List, Dict
 from backend.config import settings
 
 
@@ -34,6 +35,6 @@ def get_ssl_expiry(hostname: str, port: int = 443) -> dict:
         }
 
 
-def check_all_domains() -> list[dict]:
+def check_all_domains() -> List[Dict]:
     domains = settings.ssl_domain_list
     return [get_ssl_expiry(d) for d in domains]
