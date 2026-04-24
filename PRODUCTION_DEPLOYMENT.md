@@ -2,8 +2,8 @@
 
 ## URLs
 
-- **Frontend**: https://gitmonit.intelligence.app
-- **Backend API**: https://backendec2.intelligence.app
+- **Frontend**: https://gitmonit.intelligens.app
+- **Backend API**: https://backendec2.intelligens.app
 
 ## Backend Deployment
 
@@ -85,12 +85,12 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
 ### 4. Nginx Configuration for Backend
 
-Create `/etc/nginx/sites-available/backendec2.intelligence.app`:
+Create `/etc/nginx/sites-available/backendec2.intelligens.app`:
 
 ```nginx
 server {
     listen 80;
-    server_name backendec2.intelligence.app;
+    server_name backendec2.intelligens.app;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -105,10 +105,10 @@ server {
 Enable and get SSL:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/backendec2.intelligence.app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/backendec2.intelligens.app /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
-sudo certbot --nginx -d backendec2.intelligence.app
+sudo certbot --nginx -d backendec2.intelligens.app
 ```
 
 ## Frontend Deployment
@@ -129,12 +129,12 @@ This creates a `dist/` folder with optimized static files.
 
 ### 2. Nginx Configuration for Frontend
 
-Create `/etc/nginx/sites-available/gitmonit.intelligence.app`:
+Create `/etc/nginx/sites-available/gitmonit.intelligens.app`:
 
 ```nginx
 server {
     listen 80;
-    server_name gitmonit.intelligence.app;
+    server_name gitmonit.intelligens.app;
     root /var/www/html/sechudleec2/frontend-react/dist;
     index index.html;
 
@@ -153,10 +153,10 @@ server {
 Enable and get SSL:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/gitmonit.intelligence.app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/gitmonit.intelligens.app /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
-sudo certbot --nginx -d gitmonit.intelligence.app
+sudo certbot --nginx -d gitmonit.intelligens.app
 ```
 
 ## Environment Variables
@@ -164,7 +164,7 @@ sudo certbot --nginx -d gitmonit.intelligence.app
 ### Frontend (.env.production)
 
 ```
-VITE_API_URL=https://backendec2.intelligence.app
+VITE_API_URL=https://backendec2.intelligens.app
 ```
 
 ### Backend (.env)
@@ -216,18 +216,18 @@ npm run build
 ### Backend Health Check
 
 ```bash
-curl https://backendec2.intelligence.app/health
+curl https://backendec2.intelligens.app/health
 # Should return: {"status":"ok"}
 ```
 
 ### Frontend Access
 
-Open browser: https://gitmonit.intelligence.app
+Open browser: https://gitmonit.intelligens.app
 
 ### API Test
 
 ```bash
-curl -H "X-API-Key: YOUR_KEY" https://backendec2.intelligence.app/api/status
+curl -H "X-API-Key: YOUR_KEY" https://backendec2.intelligens.app/api/status
 ```
 
 ## Troubleshooting
@@ -263,7 +263,7 @@ sudo nginx -t
 ### CORS Errors
 
 Make sure backend CORS settings include frontend domain:
-- `https://gitmonit.intelligence.app`
+- `https://gitmonit.intelligens.app`
 
 ### API Connection Failed
 
@@ -315,7 +315,7 @@ sudo tail -f /var/log/nginx/error.log
 cat /var/www/html/sechudleec2/backend/audit_log.json | jq
 
 # Via API
-curl -H "X-API-Key: YOUR_KEY" https://backendec2.intelligence.app/api/audit | jq
+curl -H "X-API-Key: YOUR_KEY" https://backendec2.intelligens.app/api/audit | jq
 ```
 
 ## Backup
@@ -324,8 +324,8 @@ curl -H "X-API-Key: YOUR_KEY" https://backendec2.intelligence.app/api/audit | jq
 
 - `/var/www/html/sechudleec2/backend/.env`
 - `/var/www/html/sechudleec2/backend/audit_log.json`
-- `/etc/nginx/sites-available/backendec2.intelligence.app`
-- `/etc/nginx/sites-available/gitmonit.intelligence.app`
+- `/etc/nginx/sites-available/backendec2.intelligens.app`
+- `/etc/nginx/sites-available/gitmonit.intelligens.app`
 - `/etc/systemd/system/ec2-dashboard-backend.service`
 
 ### Backup Script
@@ -337,8 +337,8 @@ mkdir -p $BACKUP_DIR
 
 cp /var/www/html/sechudleec2/backend/.env $BACKUP_DIR/
 cp /var/www/html/sechudleec2/backend/audit_log.json $BACKUP_DIR/
-cp /etc/nginx/sites-available/backendec2.intelligence.app $BACKUP_DIR/
-cp /etc/nginx/sites-available/gitmonit.intelligence.app $BACKUP_DIR/
+cp /etc/nginx/sites-available/backendec2.intelligens.app $BACKUP_DIR/
+cp /etc/nginx/sites-available/gitmonit.intelligens.app $BACKUP_DIR/
 cp /etc/systemd/system/ec2-dashboard-backend.service $BACKUP_DIR/
 
 tar -czf $BACKUP_DIR.tar.gz $BACKUP_DIR
