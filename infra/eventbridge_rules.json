@@ -1,0 +1,34 @@
+{
+  "rules": [
+    {
+      "Name": "gitlab-ec2-stop-weekday",
+      "ScheduleExpression": "cron(30 16 ? * MON-FRI *)",
+      "Description": "Stop GitLab EC2 at 10:00pm IST (16:30 UTC) Mon-Fri",
+      "State": "ENABLED"
+    },
+    {
+      "Name": "gitlab-ec2-start-weekday",
+      "ScheduleExpression": "cron(0 2 ? * MON-FRI *)",
+      "Description": "Start GitLab EC2 at 7:30am IST (02:00 UTC) Mon-Fri",
+      "State": "ENABLED"
+    },
+    {
+      "Name": "gitlab-ec2-stop-weekend",
+      "ScheduleExpression": "cron(30 8 ? * SAT *)",
+      "Description": "Stop GitLab EC2 at 2:00pm IST (08:30 UTC) Saturday",
+      "State": "ENABLED"
+    },
+    {
+      "Name": "gitlab-ec2-start-weekend",
+      "ScheduleExpression": "cron(0 2 ? * MON *)",
+      "Description": "Start GitLab EC2 at 7:30am IST (02:00 UTC) Monday",
+      "State": "ENABLED"
+    }
+  ],
+  "notes": {
+    "timezone": "IST = UTC+5:30",
+    "weekday_hours_off": "~9.5 hrs/day x 5 days = ~47.5 hrs/week",
+    "weekend_hours_off": "~65 hrs (Sat 2pm to Mon 7:30am)",
+    "total_off_per_week": "~112.5 hrs vs 168 total = ~67% uptime -> ~33% billing reduction"
+  }
+}

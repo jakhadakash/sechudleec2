@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body { @apply bg-bg text-tp antialiased font-sans; }
+  ::-webkit-scrollbar { @apply w-1.5; background: #0D1117; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full; background: #1E2D45; }
+  ::-webkit-scrollbar-thumb:hover { background: #2A3F5F; }
+  select { color-scheme: dark; }
+  select option { background-color: #111D30 !important; color: #E8EEFF !important; }
+}
+
+@layer utilities {
+  /* Shimmer skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #0D1526 25%, #1a2845 50%, #0D1526 75%);
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded;
+  }
+
+  /* ── Glassmorphism card ── */
+  .glass-card {
+    background: rgba(13, 21, 38, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(30, 45, 69, 0.7);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.055);
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  }
+
+  /* Default hover glow (blue) */
+  .glass-card:hover {
+    border-color: rgba(77, 158, 255, 0.28);
+    box-shadow:
+      0 0 0 1px rgba(77, 158, 255, 0.1),
+      0 14px 44px rgba(0, 0, 0, 0.7),
+      0 0 70px rgba(77, 158, 255, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
+  }
+
+  /* Accent-specific hover glows */
+  .accent-green.glass-card:hover {
+    border-color: rgba(0, 200, 83, 0.32) !important;
+    box-shadow:
+      0 0 0 1px rgba(0, 200, 83, 0.1),
+      0 14px 44px rgba(0, 0, 0, 0.7),
+      0 0 70px rgba(0, 200, 83, 0.09),
+      0 -2px 30px rgba(0, 200, 83, 0.12),
+      inset 0 1px 0 rgba(0, 200, 83, 0.08) !important;
+  }
+  .accent-red.glass-card:hover {
+    border-color: rgba(255, 68, 68, 0.32) !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 68, 68, 0.1),
+      0 14px 44px rgba(0, 0, 0, 0.7),
+      0 0 70px rgba(255, 68, 68, 0.09),
+      0 -2px 30px rgba(255, 68, 68, 0.12),
+      inset 0 1px 0 rgba(255, 68, 68, 0.08) !important;
+  }
+  .accent-amber.glass-card:hover {
+    border-color: rgba(245, 166, 35, 0.32) !important;
+    box-shadow:
+      0 0 0 1px rgba(245, 166, 35, 0.1),
+      0 14px 44px rgba(0, 0, 0, 0.7),
+      0 0 70px rgba(245, 166, 35, 0.07),
+      0 -2px 30px rgba(245, 166, 35, 0.1),
+      inset 0 1px 0 rgba(245, 166, 35, 0.07) !important;
+  }
+  .accent-blue.glass-card:hover {
+    border-color: rgba(77, 158, 255, 0.35) !important;
+    box-shadow:
+      0 0 0 1px rgba(77, 158, 255, 0.12),
+      0 14px 44px rgba(0, 0, 0, 0.7),
+      0 0 70px rgba(77, 158, 255, 0.09),
+      0 -2px 30px rgba(77, 158, 255, 0.12),
+      inset 0 1px 0 rgba(77, 158, 255, 0.09) !important;
+  }
+
+  /* ── Top accent borders (rest-state) ── */
+  .accent-green {
+    border-top: 1px solid rgba(0, 200, 83, 0.5) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.04),
+      0 8px 32px rgba(0,0,0,.55),
+      0 -2px 24px rgba(0, 200, 83, 0.1),
+      inset 0 1px 0 rgba(0, 200, 83, 0.08) !important;
+  }
+  .accent-red {
+    border-top: 1px solid rgba(255, 68, 68, 0.5) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.04),
+      0 8px 32px rgba(0,0,0,.55),
+      0 -2px 24px rgba(255, 68, 68, 0.1),
+      inset 0 1px 0 rgba(255, 68, 68, 0.08) !important;
+  }
+  .accent-amber {
+    border-top: 1px solid rgba(245, 166, 35, 0.5) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.04),
+      0 8px 32px rgba(0,0,0,.55),
+      0 -2px 24px rgba(245, 166, 35, 0.08),
+      inset 0 1px 0 rgba(245, 166, 35, 0.06) !important;
+  }
+  .accent-blue {
+    border-top: 1px solid rgba(77, 158, 255, 0.5) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.04),
+      0 8px 32px rgba(0,0,0,.55),
+      0 -2px 24px rgba(77, 158, 255, 0.1),
+      inset 0 1px 0 rgba(77, 158, 255, 0.07) !important;
+  }
+
+  /* DD labels */
+  .dd-label { @apply text-[9px] font-bold uppercase tracking-[.13em] text-tm; }
+  .dd-value  { @apply text-[13px] font-bold tabular-nums text-tp; }
+
+  /* Cron syntax highlight */
+  .cron-paren { color: #3A5070; }
+  .cron-num   { color: #F5A623; }
+  .cron-wild  { color: #3A5070; }
+  .cron-days  { color: #00E676; }
+  .cron-sep   { color: #2A3F5F; }
+}

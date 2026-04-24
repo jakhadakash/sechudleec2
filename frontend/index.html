@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EC2 Scheduler Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="h-brand">
+    <div class="h-logo">&#9729;</div>
+    <span class="h-title">EC2 Scheduler</span>
+    <span class="h-env">GitLab · Production</span>
+  </div>
+  <div class="h-right">
+    <div class="h-status-dot"></div>
+    <span id="last-updated">Connecting…</span>
+  </div>
+</header>
+
+<!-- ── Banners ── -->
+<div id="alert-ssl"  class="alert alert-critical hidden">&#9888;&nbsp; SSL certificate expiring within 14 days — renew immediately.</div>
+<div id="alert-disk" class="alert alert-warning  hidden">&#9888;&nbsp; Disk usage above 70% — run artifact cleanup.</div>
+
+<!-- ── Cards ── -->
+<main class="card-grid">
+
+  <!-- 1: Instance Status -->
+  <div class="card" id="card-status">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#9711;</span> Instance Status</div>
+      <span id="ec2-state" class="badge badge-unknown"><span class="bdot"></span>loading…</span>
+    </div>
+    <hr class="sep"/>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-lbl">Instance ID</span>
+        <span class="meta-val mono" id="ec2-instance-id">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-lbl">Type</span>
+        <span class="meta-val" id="ec2-type">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-lbl">Public IP</span>
+        <span class="meta-val mono" id="ec2-ip">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-lbl">Uptime</span>
+        <span class="meta-val" id="ec2-uptime">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: Controls -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#9654;</span> Instance Controls</div>
+      <span class="card-tag">Manual Override</span>
+    </div>
+    <hr class="sep"/>
+    <p style="font-size:12.5px;color:var(--textMid);line-height:1.65;">
+      Manually start or stop the GitLab EC2 instance.<br>
+      <span style="color:var(--textDim);">Stop gracefully flushes Sidekiq before shutdown.</span>
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-green" id="btn-start" disabled>&#9654;&nbsp; Start</button>
+      <button class="btn btn-red"   id="btn-stop"  disabled>&#9646;&#9646;&nbsp; Stop</button>
+    </div>
+  </div>
+
+  <!-- 3: Active Schedule -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#8987;</span> Active Schedule</div>
+      <span class="card-tag">EventBridge</span>
+    </div>
+    <hr class="sep"/>
+    <table class="sch-table">
+      <thead>
+        <tr>
+          <th>Rule</th>
+          <th>Cron (UTC)</th>
+          <th>State</th>
+        </tr>
+      </thead>
+      <tbody id="schedule-tbody">
+        <tr><td colspan="3" style="color:var(--textDim);padding:12px 8px;">Loading…</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:14px;padding:10px 12px;background:var(--s2);border:1px solid var(--borderSoft);border-radius:var(--r-sm);font-size:12px;">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="color:var(--textDim);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Active Days</span>
+        <span style="font-weight:600;color:var(--text);" id="sched-summary-days">Mon – Sat</span>
+      </div>
+      <div style="width:1px;background:var(--border);"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="color:var(--textDim);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Hours (IST)</span>
+        <span style="font-weight:600;color:var(--text);" id="sched-summary-hours">9:00 AM – 9:00 PM</span>
+      </div>
+      <div style="width:1px;background:var(--border);"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="color:var(--textDim);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Off Day</span>
+        <span style="font-weight:600;color:var(--red);">Sunday</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: Schedule Editor -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#9998;</span> Edit Schedule</div>
+      <span class="card-tag">IST = UTC+5:30</span>
+    </div>
+    <hr class="sep"/>
+
+    <div class="sch-editor">
+
+      <!-- Day picker -->
+      <div>
+        <div class="sch-section-label">Active Days</div>
+        <div class="day-grid" id="day-grid">
+          <div class="day-btn active" data-day="MON"><span class="day-short">Mon</span><span class="day-check"></span></div>
+          <div class="day-btn active" data-day="TUE"><span class="day-short">Tue</span><span class="day-check"></span></div>
+          <div class="day-btn active" data-day="WED"><span class="day-short">Wed</span><span class="day-check"></span></div>
+          <div class="day-btn active" data-day="THU"><span class="day-short">Thu</span><span class="day-check"></span></div>
+          <div class="day-btn active" data-day="FRI"><span class="day-short">Fri</span><span class="day-check"></span></div>
+          <div class="day-btn active" data-day="SAT"><span class="day-short">Sat</span><span class="day-check"></span></div>
+          <div class="day-btn"        data-day="SUN"><span class="day-short">Sun</span><span class="day-check"></span></div>
+        </div>
+      </div>
+
+      <!-- Time pickers -->
+      <div class="time-row">
+        <div class="time-field">
+          <label class="time-label"><span class="t-icon">&#9728;</span> Wake Up Time</label>
+          <select class="time-select" id="time-start"></select>
+        </div>
+        <div class="time-field">
+          <label class="time-label"><span class="t-icon">&#9790;</span> Sleep Time</label>
+          <select class="time-select" id="time-stop"></select>
+        </div>
+      </div>
+
+      <!-- Cron preview -->
+      <div class="cron-preview">
+        <div class="cron-preview-item">
+          <span class="p-lbl">Start cron (UTC)</span>
+          <span class="p-val" id="preview-start">—</span>
+        </div>
+        <div class="cron-preview-item">
+          <span class="p-lbl">Stop cron (UTC)</span>
+          <span class="p-val" id="preview-stop">—</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-save-schedule" style="width:100%;">
+        Apply Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- 5: SSL Certificates -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#128274;</span> SSL Certificates</div>
+      <span class="card-tag">Certbot</span>
+    </div>
+    <hr class="sep"/>
+    <div id="ssl-list" style="display:flex;flex-direction:column;gap:8px;">
+      <div style="color:var(--textDim);font-size:13px;">Loading…</div>
+    </div>
+  </div>
+
+  <!-- 6: Disk Usage -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#128190;</span> Disk Usage</div>
+      <span class="card-tag">/var/opt/gitlab</span>
+    </div>
+    <hr class="sep"/>
+    <div style="display:flex;align-items:flex-end;gap:8px;">
+      <span class="disk-pct-big" id="disk-pct">—</span>
+      <span style="font-size:15px;color:var(--textDim);padding-bottom:5px;">used</span>
+    </div>
+    <div>
+      <div class="disk-track">
+        <div class="disk-fill disk-fill-ok" id="disk-bar" style="width:0%"></div>
+      </div>
+      <div class="disk-meta" style="margin-top:6px;">
+        <span id="disk-used">—</span>
+        <span id="disk-total">—</span>
+      </div>
+    </div>
+    <hr class="sep"/>
+    <div style="display:flex;justify-content:space-between;font-size:12px;">
+      <span style="color:var(--textDim);">Warning threshold</span>
+      <span style="color:var(--yellow);font-weight:600;">70%</span>
+    </div>
+  </div>
+
+  <!-- 7: CPU Credits -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#9889;</span> CPU Credit Balance</div>
+      <span class="card-tag" id="cpu-type-tag">Burstable</span>
+    </div>
+    <hr class="sep"/>
+    <div class="cpu-hero">
+      <span class="cpu-num" id="cpu-value">—</span>
+      <div class="cpu-levels">
+        <div class="cpu-level"><span class="dot" style="background:var(--green);"></span><span style="color:var(--textDim);">Healthy ≥ 30</span></div>
+        <div class="cpu-level"><span class="dot" style="background:var(--yellow);"></span><span style="color:var(--textDim);">Warning &lt; 30</span></div>
+        <div class="cpu-level"><span class="dot" style="background:var(--red);"></span><span style="color:var(--textDim);">Critical &lt; 10</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8: Monthly Cost -->
+  <div class="card">
+    <div class="card-accent"></div>
+    <div class="card-hdr">
+      <div class="card-label"><span class="card-label-icon">&#8377;</span> Monthly Cost (EC2)</div>
+      <span class="card-tag">Cost Explorer</span>
+    </div>
+    <hr class="sep"/>
+    <div>
+      <div class="cost-amount-row">
+        <span class="cost-sym">₹</span>
+        <span class="cost-num" id="cost-current">0</span>
+      </div>
+      <div class="cost-period" id="cost-period">month to date</div>
+    </div>
+    <div class="cost-rows">
+      <div class="cost-row">
+        <span class="r-lbl">Projected this month</span>
+        <span class="r-val" id="cost-projected">—</span>
+      </div>
+      <div class="cost-row">
+        <span class="r-lbl">Target</span>
+        <span class="r-val" id="cost-target">₹1,600</span>
+      </div>
+      <div class="cost-row">
+        <span class="r-lbl">Status</span>
+        <span class="r-val" id="cost-on-track">—</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Confirm Modal ── -->
+<div id="modal-confirm" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-icon-wrap" id="modal-icon">&#9888;</div>
+    <div>
+      <h3 id="modal-title">Confirm Action</h3>
+      <p id="modal-message" style="margin-top:6px;"></p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost"  id="modal-cancel-btn">Cancel</button>
+      <button class="btn btn-red"    id="modal-confirm-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ── -->
+<script src="js/api.js"></script>
+<script src="js/cpu.js"></script>
+<script src="js/status.js"></script>
+<script src="js/controls.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/ssl.js"></script>
+<script src="js/disk.js"></script>
+<script src="js/cost.js"></script>
+<script>
+  // card mouse-tracking glow
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
+
+  const _baseStatus = refreshStatus;
+  async function refreshStatus() {
+    await _baseStatus();
+    try {
+      const d = await apiFetch('/status');
+      updateCpuCard(d.cpu_credits, d.instance_type);
+    } catch(_){}
+  }
+
+  setupControls();
+  setupScheduleEditor();
+
+  async function refreshAll() {
+    await Promise.allSettled([
+      refreshStatus(),
+      refreshSchedule(),
+      refreshSSL(),
+      refreshDisk(),
+      refreshCost(),
+    ]);
+  }
+
+  refreshAll();
+  setInterval(refreshAll, 30_000);
+</script>
+</body>
+</html>

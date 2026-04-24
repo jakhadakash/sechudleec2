@@ -1,0 +1,17 @@
+[Unit]
+Description=EC2 Scheduler Dashboard API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/ec2-dashboard
+EnvironmentFile=/opt/ec2-dashboard/.env
+ExecStart=/opt/ec2-dashboard/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
