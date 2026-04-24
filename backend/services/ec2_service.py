@@ -1,5 +1,6 @@
 import boto3
 from datetime import datetime, timezone, timedelta
+from typing import Optional
 from backend.config import settings
 from backend.services.audit_service import log_action
 
@@ -84,7 +85,7 @@ def stop_instance() -> dict:
     return {"action": "stop", "current_state": state}
 
 
-def _get_cpu_credits() -> float | None:
+def _get_cpu_credits() -> Optional[float]:
     try:
         cw = _cw_client()
         resp = cw.get_metric_statistics(
