@@ -1,5 +1,7 @@
 import type { InstanceStatus, ScheduleData, SSLCert, DiskUsage, CostData, ScheduleUpdate, AuditLogsResponse } from './types';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 function getApiKey(): string {
   let key = sessionStorage.getItem('ec2_api_key') ?? '';
   if (!key) {
@@ -10,7 +12,8 @@ function getApiKey(): string {
 }
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const url = `${API_BASE_URL}/api${path}`;
+  const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
