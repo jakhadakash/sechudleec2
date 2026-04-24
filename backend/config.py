@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from pathlib import Path
+from typing import List
 
 _HERE = Path(__file__).parent
 # Accept .env from backend/ or from project root — whichever exists first
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     SSL_DOMAINS: str = ""
 
     @property
-    def ssl_domain_list(self) -> list[str]:
+    def ssl_domain_list(self) -> List[str]:
         return [d.strip() for d in self.SSL_DOMAINS.split(",") if d.strip()]
 
 
